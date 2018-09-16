@@ -18,3 +18,9 @@ services:
       - ./grafana/environment
     depends_on:
       - prometheus
+
+  app:
+    build: .
+    ports:
+    - 8080:8080
+
