@@ -1,0 +1,8 @@
+grafana:
+  image: grafana/grafana:5.1.5
+  ports:
+    - 3000:3000
+  volumes:
+    - ./grafana/data:/var/lib/grafana
+  env_file:
+    - ./grafana/environment
