@@ -9,6 +9,8 @@
                  [http-kit "2.3.0"]
                  [compojure "1.6.1"]
                  [ring/ring-defaults "0.3.1"]
+                 [iapetos "0.1.7"]
+                 [io.prometheus/simpleclient_hotspot "0.1.0"]
                  ]
   :main ^:skip-aot clojure-prometheus-demo.core
   :target-path "target/%s"
