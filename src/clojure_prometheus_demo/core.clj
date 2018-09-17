@@ -19,16 +19,24 @@
 (defonce registry
          (-> (prometheus/collector-registry)
              jvm/initialize
-             ring/initialize))
+             ring/initialize
+             (prometheus/register
+               (prometheus/summary :clojure-prometheus-demo/crimes-lookup-seconds)
+               (prometheus/summary :clojure-prometheus-demo/postcode-lookup-seconds))))
 
 (defn wrap-metrics [app]
   (ring/wrap-metrics app
                      registry
-                     {:path "/metrics" :path-fn (fn [r] "/")}))
+                     {:path "/metrics"
+                      ; make sure we are not creating a metric for every postcode
+                      ; this would still create metrics for not existing paths
+                      :path-fn #(re-find #"^/[^/]+" (:uri %))}))
 
 (defn postcode->long-lat [postcode]
   (->
-    (client/get (str "https://api.postcodes.io/postcodes/" postcode) {:as :json})
+    (prometheus/with-duration
+      (registry :clojure-prometheus-demo/postcode-lookup-seconds)
+      (client/get (str "https://api.postcodes.io/postcodes/" postcode) {:as :json}))
     :body
     :result
     (select-keys [:longitude :latitude])))
@@ -36,9 +44,11 @@
 ; https://data.police.uk/docs/method/crime-street/
 (defn long-lat->crimes [{:keys [longitude latitude]}]
   (log/infof "Looking up crimes for long:%s lat:%s" longitude latitude)
-  (client/get "https://data.police.uk/api/crimes-street/all-crime"
-              {:query-params {"lng" longitude "lat" latitude}
-               :as :json}))
+  (prometheus/with-duration
+    (registry :clojure-prometheus-demo/crimes-lookup-seconds)
+    (client/get "https://data.police.uk/api/crimes-street/all-crime"
+                {:query-params {"lng" longitude "lat" latitude}
+                 :as :json})))
 
 (defn crimes [postcode]
   (->> postcode postcode->long-lat long-lat->crimes
