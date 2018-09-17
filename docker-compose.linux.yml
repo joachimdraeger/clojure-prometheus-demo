@@ -1,0 +1,4 @@
+version: '3.5'
+services:
+  grafana:
+    user: ${GRAFANA_UID}:${GRAFANA_GID}
