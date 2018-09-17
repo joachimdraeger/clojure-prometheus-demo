@@ -56,8 +56,8 @@
          :body (map :category) frequencies
          (sort-by last)
          (map #(s/join ": " %))
-         (s/join "\n")))
-    "\n")
+         (s/join "\n"))
+    "\n"))
 
 
 (defonce server (atom nil))
