@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as s]
     [clojure.tools.logging :as log]
-    [ring.util.response :refer [response]]
+    [ring.util.response :refer [response header]]
     [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
     [org.httpkit.server :refer [run-server]]
     [compojure.core :refer [defroutes context GET]]
@@ -50,12 +50,14 @@
                 {:query-params {"lng" longitude "lat" latitude}
                  :as :json})))
 
-(defn crimes [postcode]
-  (->> postcode postcode->long-lat long-lat->crimes
-       :body (map :category) frequencies
-       (sort-by last)
-       (map #(s/join ": " %))
-       (s/join "\n")))
+(defn crimes->text [postcode]
+  (str
+    (->> postcode postcode->long-lat long-lat->crimes
+         :body (map :category) frequencies
+         (sort-by last)
+         (map #(s/join ": " %))
+         (s/join "\n")))
+    "\n")
 
 
 (defonce server (atom nil))
@@ -64,7 +66,11 @@
   (GET "/healthcheck" []
        (response "Es geht mir gut!"))
   (GET "/crime/:postcode" [postcode]
-       (response  (crimes postcode)))         )
+       (->
+         postcode
+         crimes->text
+         response
+         (header "Content-Type" "text/plain"))))
 
 (def app
   (-> app-routes
