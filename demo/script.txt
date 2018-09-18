@@ -1,0 +1,36 @@
+    [iapetos.core :as prometheus]
+    [iapetos.collector.jvm :as jvm]
+    [iapetos.collector.ring :as ring]
+
+
+
+
+
+    (defonce registry
+             (-> (prometheus/collector-registry)
+                 jvm/initialize
+                 ring/initialize
+                 (prometheus/register )))
+
+
+(defn wrap-metrics [app]
+  (ring/wrap-metrics app
+                     registry
+                     {:path "/metrics" }))
+; (def app
+wrap-metrics
+
+                                           ; make sure we are not creating a metric for every postcode
+                                           ; this would still create metrics for not existing paths
+                                           :path-fn #(re-find #"^/[^/]+" (:uri %))
+
+
+                  (prometheus/summary :clojure-prometheus-demo/crimes-lookup-seconds)
+                  (prometheus/summary :clojure-prometheus-demo/postcode-lookup-seconds)
+
+
+                      (prometheus/with-duration
+                        (registry :clojure-prometheus-demo/postcode-lookup-seconds)
+
+                          (prometheus/with-duration
+                            (registry :clojure-prometheus-demo/crimes-lookup-seconds)

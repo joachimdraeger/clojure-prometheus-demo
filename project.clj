@@ -12,8 +12,8 @@
                  [clj-http "3.9.1"]
                  [cheshire "5.8.0"]
 
-                 [iapetos "0.1.7"]
-                 [io.prometheus/simpleclient_hotspot "0.1.0"]
+                 ;[iapetos "0.1.7"]
+                 ;[io.prometheus/simpleclient_hotspot "0.1.0"]
                  ]
   :main ^:skip-aot clojure-prometheus-demo.core
   :target-path "target/%s"
