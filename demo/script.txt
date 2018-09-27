@@ -24,6 +24,7 @@ wrap-metrics
                                            ; this would still create metrics for not existing paths
                                            :path-fn #(re-find #"^/[^/]+" (:uri %))
 
+docker-compose -f docker-compose.yml -f docker-compose.prom-data.yml up --build
 
                   (prometheus/summary :clojure-prometheus-demo/crimes-lookup-seconds)
                   (prometheus/summary :clojure-prometheus-demo/postcode-lookup-seconds)
@@ -34,3 +35,15 @@ wrap-metrics
 
                           (prometheus/with-duration
                             (registry :clojure-prometheus-demo/crimes-lookup-seconds)
+
+
+rate(process_cpu_seconds_total{job="app"}[15s])
+
+curl localhost:8080/crime/HA74PD
+siege -c 1 -d 5s -t 5m http://localhost:8080/crime/HA74PD
+
+increase(http_request_latency_seconds_sum{path="/crime"}[1m]) / increase(http_request_latency_seconds_count{path="/crime"}[1m])
+
+increase(clojure_prometheus_demo_crimes_lookup_seconds_sum[1m]) / increase(clojure_prometheus_demo_crimes_lookup_seconds_count[1m])
+increase(clojure_prometheus_demo_postcode_lookup_seconds_sum[1m]) / increase(clojure_prometheus_demo_postcode_lookup_seconds_count[1m])
+increase(http_request_latency_seconds_count{path="/crime"}[1m])
