@@ -42,17 +42,19 @@
     (select-keys [:longitude :latitude])))
 
 ; https://data.police.uk/docs/method/crime-street/
-(defn long-lat->crimes [{:keys [longitude latitude]}]
-  (log/infof "Looking up crimes for long:%s lat:%s" longitude latitude)
+(defn long-lat->crimes [date {:keys [longitude latitude]}]
+  (log/infof "Looking up crimes for long:%s lat:%s date:%s" longitude latitude date)
   (prometheus/with-duration
     (registry :clojure-prometheus-demo/crimes-lookup-seconds)
     (client/get "https://data.police.uk/api/crimes-street/all-crime"
-                {:query-params {"lng" longitude "lat" latitude}
+                {:query-params (-> {"lng" longitude "lat" latitude} (cond-> date (assoc "date" date)))
                  :as :json})))
 
-(defn crimes->text [postcode]
+(defn crimes->text [postcode date]
   (str
-    (->> postcode postcode->long-lat long-lat->crimes
+    (->> postcode
+         postcode->long-lat
+         (long-lat->crimes date)
          :body (map :category) frequencies
          (sort-by last)
          (map #(s/join ": " %))
@@ -65,10 +67,10 @@
 (defroutes app-routes
   (GET "/healthcheck" []
        (response "Es geht mir gut!"))
-  (GET "/crime/:postcode" [postcode]
+  (GET "/crime/:postcode" [postcode date]
        (->
          postcode
-         crimes->text
+         (crimes->text date)
          response
          (header "Content-Type" "text/plain"))))
 

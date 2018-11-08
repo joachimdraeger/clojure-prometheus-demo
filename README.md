@@ -23,7 +23,7 @@ The demo service compiles crime statistics for a UK postcode. It uses *postcodes
 - on Linux run `up-linux.sh`. This will make sure that Grafana runs with your UID to be able to access the DB.
 - on Mac OS `docker-compose up` should do the trick.
 
-To lookup crime stats for Stanmore Tube station: `curl http://localhost:8080/crime/HA74PD`
+To lookup crime stats for Stanmore Tube station for August 2018: `curl http://localhost:8080/crime/HA74PD?date=2018-08`
 
 You can login to Grafana on http://localhost:3000 with username `admin` and password `admin`.
 
