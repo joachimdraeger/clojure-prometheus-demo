@@ -10,9 +10,9 @@
 
     [iapetos.core :as prometheus]
     [iapetos.collector.jvm :as jvm]
-    [iapetos.collector.ring :as ring]
+    [iapetos.collector.ring :as ring])
 
-    )
+
   (:gen-class))
 
 
@@ -81,4 +81,4 @@
 
 (defn -main [& args]
   (log/info "Starting server")
-  (reset! server (run-server app {:port 8080 })))
+  (reset! server (run-server app {:port 8080})))
