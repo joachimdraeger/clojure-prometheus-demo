@@ -1,4 +1,4 @@
-FROM clojure
+FROM clojure:openjdk-11-lein
 
 WORKDIR /srv
 
